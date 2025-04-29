@@ -3,6 +3,7 @@ var columns = 5;
 
 var currTile;
 var otherTile;
+var dragPreview = null;
 
 var turns = 0;
 
@@ -99,9 +100,31 @@ function dragEnd() {
 // Touch
 function handleTouchStart(e) {
   currTile = e.target;
+
+  // Crear imagen flotante
+  dragPreview = currTile.cloneNode(true);
+  dragPreview.style.position = "fixed";
+  dragPreview.style.pointerEvents = "none";
+  dragPreview.style.opacity = 0.7;
+  dragPreview.style.zIndex = 1000;
+  dragPreview.style.width = currTile.offsetWidth + "px";
+  dragPreview.style.height = currTile.offsetHeight + "px";
+
+  document.body.appendChild(dragPreview);
+
+  const touch = e.touches[0];
+  dragPreview.style.left = touch.clientX - currTile.offsetWidth / 2 + "px";
+  dragPreview.style.top = touch.clientY - currTile.offsetHeight / 2 + "px";
 }
+
 function handleTouchMove(e) {
   const touch = e.touches[0];
+
+  if (dragPreview) {
+    dragPreview.style.left = touch.clientX - dragPreview.offsetWidth / 2 + "px";
+    dragPreview.style.top = touch.clientY - dragPreview.offsetHeight / 2 + "px";
+  }
+
   const target = document.elementFromPoint(touch.clientX, touch.clientY);
 
   if (
@@ -112,7 +135,13 @@ function handleTouchMove(e) {
     otherTile = target;
   }
 }
+
 function handleTouchEnd(e) {
+  if (dragPreview) {
+    dragPreview.remove();
+    dragPreview = null;
+  }
+
   if (
     !currTile ||
     !otherTile ||

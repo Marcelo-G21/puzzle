@@ -140,19 +140,19 @@ html, body {
   #board {
     width: 240px;
     height: 240px;
-    grid-template-columns: repeat(5, 48px);
-    grid-template-rows: repeat(5, 48px);
+    grid-template-columns: repeat(5, 47px);
+    grid-template-rows: repeat(5, 47px);
   }
 
   #pieces {
-    width: 240px;
+    width: 245px;
     height: auto;
     overflow-y: auto;
   }
 
   #pieces img {
-    width: 48px;
-    height: 48px;
+    width: 47px;
+    height: 47px;
   }
 
   #win-screen .moves-text {

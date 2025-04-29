@@ -7,13 +7,13 @@ var dragPreview = null;
 
 var turns = 0;
 
-const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
 
 window.onload = function () {
   adjustViewportHeight();
 
-  window.addEventListener('resize', adjustViewportHeight);
-  window.addEventListener('orientationchange', adjustViewportHeight);
+  window.addEventListener("resize", adjustViewportHeight);
+  window.addEventListener("orientationchange", adjustViewportHeight);
 
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < columns; c++) {
@@ -43,16 +43,20 @@ window.onload = function () {
   }
 
   // Previene el zoom con doble toque en iOS
-  document.body.addEventListener("touchstart", function (e) {
-    if (e.touches.length > 1) {
-      e.preventDefault();
-    }
-  }, { passive: false });
+  document.body.addEventListener(
+    "touchstart",
+    function (e) {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    },
+    { passive: false }
+  );
 };
 
 function adjustViewportHeight() {
   const vh = window.innerHeight * 0.01;
-  document.documentElement.style.setProperty('--vh', `${vh}px`);
+  document.documentElement.style.setProperty("--vh", `${vh}px`);
 }
 
 function addTileEventListeners(tile) {
@@ -113,8 +117,10 @@ function handleTouchStart(e) {
   document.body.appendChild(dragPreview);
 
   const touch = e.touches[0];
-  dragPreview.style.left = touch.clientX - currTile.offsetWidth / 2 + "px";
-  dragPreview.style.top = touch.clientY - currTile.offsetHeight / 2 + "px";
+  const offsetY = 30; // Ajuste para levantar la imagen por encima del dedo
+  dragPreview.style.left = touch.clientX - dragPreview.offsetWidth / 2 + "px";
+  dragPreview.style.top =
+    touch.clientY - dragPreview.offsetHeight / 2 - offsetY + "px";
 }
 
 function handleTouchMove(e) {
@@ -125,7 +131,11 @@ function handleTouchMove(e) {
     dragPreview.style.top = touch.clientY - dragPreview.offsetHeight / 2 + "px";
   }
 
-  const target = document.elementFromPoint(touch.clientX, touch.clientY);
+  const previewRect = dragPreview.getBoundingClientRect();
+  const centerX = previewRect.left + previewRect.width / 2;
+  const centerY = previewRect.top + previewRect.height / 2;
+
+  const target = document.elementFromPoint(centerX, centerY);
 
   if (
     target &&

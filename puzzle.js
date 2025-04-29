@@ -6,34 +6,31 @@ var otherTile;
 
 var turns = 0;
 
+const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
 window.onload = function () {
+  
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < columns; c++) {
       let tile = document.createElement("img");
       tile.src = "./images/blank.jpg";
 
-      //DRAG FUNCTIONALITY
-      tile.addEventListener("dragstart", dragStart);
-      tile.addEventListener("dragover", dragOver);
-      tile.addEventListener("dragenter", dragEnter);
-      tile.addEventListener("dragleave", dragLeave);
-      tile.addEventListener("drop", dragDrop);
-      tile.addEventListener("dragend", dragEnd);
+      // Eventos según el tipo de dispositivo
+      addInteractionEvents(tile);
 
       document.getElementById("board").append(tile);
     }
   }
 
-  //pieces
   let pieces = [];
   for (let i = 1; i <= rows * columns; i++) {
     pieces.push(i.toString());
   }
+
   pieces.reverse();
+
   for (let i = 0; i < pieces.length; i++) {
     let j = Math.floor(Math.random() * pieces.length);
-
-    //swap
     let tmp = pieces[i];
     pieces[i] = pieces[j];
     pieces[j] = tmp;
@@ -43,17 +40,28 @@ window.onload = function () {
     let tile = document.createElement("img");
     tile.src = "./images/" + pieces[i] + ".jpg";
 
-    //DRAG FUNCTIONALITY
+    addInteractionEvents(tile);
+
+    document.getElementById("pieces").append(tile);
+  }
+};
+
+function addInteractionEvents(tile) {
+  if (isTouchDevice) {
+    tile.addEventListener("touchstart", touchStart, { passive: false });
+    tile.addEventListener("touchmove", touchMove, { passive: false });
+    tile.addEventListener("touchend", touchEnd, { passive: false });
+  } else {
     tile.addEventListener("dragstart", dragStart);
     tile.addEventListener("dragover", dragOver);
     tile.addEventListener("dragenter", dragEnter);
     tile.addEventListener("dragleave", dragLeave);
     tile.addEventListener("drop", dragDrop);
     tile.addEventListener("dragend", dragEnd);
-
-    document.getElementById("pieces").append(tile);
   }
-};
+}
+
+// ---------------- DRAG ----------------
 
 function dragStart() {
   currTile = this;
@@ -61,21 +69,16 @@ function dragStart() {
 function dragOver(e) {
   e.preventDefault();
 }
-
 function dragEnter(e) {
   e.preventDefault();
 }
-
 function dragLeave() {}
-
 function dragDrop() {
   otherTile = this;
 }
-
 function dragEnd() {
-  if (currTile.src.includes("blank")) {
-    return;
-  }
+  if (currTile.src.includes("blank")) return;
+
   let currImg = currTile.src;
   let otherImg = otherTile.src;
   currTile.src = otherImg;
@@ -87,11 +90,42 @@ function dragEnd() {
   checkCompletion();
 }
 
+// ---------------- TOUCH ----------------
+
+function touchStart(e) {
+  e.preventDefault();
+  const touch = e.touches[0];
+  currTile = document.elementFromPoint(touch.clientX, touch.clientY);
+}
+
+function touchMove(e) {
+  e.preventDefault();
+  const touch = e.touches[0];
+  otherTile = document.elementFromPoint(touch.clientX, touch.clientY);
+}
+
+function touchEnd(e) {
+  e.preventDefault();
+
+  if (!currTile || !otherTile || currTile === otherTile) return;
+  if (currTile.src.includes("blank")) return;
+
+  let currImg = currTile.src;
+  let otherImg = otherTile.src;
+  currTile.src = otherImg;
+  otherTile.src = currImg;
+
+  turns += 1;
+  document.getElementById("turns").innerText = turns;
+
+  checkCompletion();
+}
+
+// ---------------- CHECK WIN ----------------
+
 function checkCompletion() {
   const tiles = document.querySelectorAll("#board img");
   for (let i = 0; i < tiles.length; i++) {
-    let expectedSrc = "./images/" + (i + 1) + ".jpg";
-
     if (!tiles[i].src.includes(i + 1 + ".jpg")) {
       return;
     }

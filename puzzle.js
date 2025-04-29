@@ -77,7 +77,9 @@ function dragDrop() {
   otherTile = this;
 }
 function dragEnd() {
-  if (currTile.src.includes("blank")) return;
+  if (currTile.src.includes("blank") || !otherTile) {
+    return;
+  }
 
   let currImg = currTile.src;
   let otherImg = otherTile.src;
@@ -105,20 +107,27 @@ function touchMove(e) {
 }
 
 function touchEnd(e) {
-  e.preventDefault();
+  if (!otherTile || currTile === otherTile) {
+    currTile = null;
+    otherTile = null;
+    return;
+  }
 
-  if (!currTile || !otherTile || currTile === otherTile) return;
-  if (currTile.src.includes("blank")) return;
+  // Swap images
+  if (!currTile.src.includes("blank")) {
+    let currImg = currTile.src;
+    let otherImg = otherTile.src;
+    currTile.src = otherImg;
+    otherTile.src = currImg;
 
-  let currImg = currTile.src;
-  let otherImg = otherTile.src;
-  currTile.src = otherImg;
-  otherTile.src = currImg;
+    turns += 1;
+    document.getElementById("turns").innerText = turns;
 
-  turns += 1;
-  document.getElementById("turns").innerText = turns;
+    checkCompletion();
+  }
 
-  checkCompletion();
+  currTile = null;
+  otherTile = null;
 }
 
 // ---------------- CHECK WIN ----------------

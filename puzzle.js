@@ -6,47 +6,53 @@ var otherTile;
 
 var turns = 0;
 
-// Detectar si es pantalla táctil
 const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
 window.onload = function () {
+  adjustViewportHeight();
+
+  window.addEventListener('resize', adjustViewportHeight);
+  window.addEventListener('orientationchange', adjustViewportHeight);
+
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < columns; c++) {
       let tile = document.createElement("img");
       tile.src = "./images/blank.jpg";
-
-      // Funcionalidad de arrastrar
       addTileEventListeners(tile);
-
       document.getElementById("board").append(tile);
     }
   }
 
-  // Piezas
   let pieces = [];
   for (let i = 1; i <= rows * columns; i++) {
     pieces.push(i.toString());
   }
   pieces.reverse();
 
-  // Mezclar piezas
   for (let i = 0; i < pieces.length; i++) {
     let j = Math.floor(Math.random() * pieces.length);
-    let tmp = pieces[i];
-    pieces[i] = pieces[j];
-    pieces[j] = tmp;
+    [pieces[i], pieces[j]] = [pieces[j], pieces[i]];
   }
 
   for (let i = 0; i < pieces.length; i++) {
     let tile = document.createElement("img");
     tile.src = "./images/" + pieces[i] + ".jpg";
-
-    // Funcionalidad de arrastrar
     addTileEventListeners(tile);
-
     document.getElementById("pieces").append(tile);
   }
+
+  // Previene el zoom con doble toque en iOS
+  document.body.addEventListener("touchstart", function (e) {
+    if (e.touches.length > 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
 };
+
+function adjustViewportHeight() {
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
 
 function addTileEventListeners(tile) {
   if (isTouchDevice) {
@@ -63,7 +69,7 @@ function addTileEventListeners(tile) {
   }
 }
 
-// Funciones drag para PC
+// PC
 function dragStart() {
   currTile = this;
 }
@@ -78,61 +84,63 @@ function dragDrop() {
   otherTile = this;
 }
 function dragEnd() {
-  if (currTile.src.includes("blank") || !otherTile) {
+  if (currTile?.src.includes("blank") || !otherTile) {
     currTile = null;
     otherTile = null;
     return;
   }
 
-  let currImg = currTile.src;
-  let otherImg = otherTile.src;
-  currTile.src = otherImg;
-  otherTile.src = currImg;
-
-  turns += 1;
-  document.getElementById("turns").innerText = turns;
-
+  swapImages();
   checkCompletion();
-
   currTile = null;
   otherTile = null;
 }
 
-// Funciones touch
+// Touch
 function handleTouchStart(e) {
   currTile = e.target;
 }
-
 function handleTouchMove(e) {
   const touch = e.touches[0];
   const target = document.elementFromPoint(touch.clientX, touch.clientY);
 
-  if (target && target.tagName === "IMG" && target.parentElement.id === "board") {
+  if (
+    target &&
+    target.tagName === "IMG" &&
+    target.parentElement?.id === "board"
+  ) {
     otherTile = target;
   }
 }
-
 function handleTouchEnd(e) {
-  if (!currTile || !otherTile || currTile === otherTile || currTile.src.includes("blank")) {
+  if (
+    !currTile ||
+    !otherTile ||
+    currTile === otherTile ||
+    currTile.src.includes("blank")
+  ) {
     currTile = null;
     otherTile = null;
     return;
   }
 
-  let currImg = currTile.src;
-  let otherImg = otherTile.src;
-  currTile.src = otherImg;
-  otherTile.src = currImg;
-
-  turns += 1;
-  document.getElementById("turns").innerText = turns;
-
+  swapImages();
   checkCompletion();
-
   currTile = null;
   otherTile = null;
 }
 
+// Swap
+function swapImages() {
+  const tempSrc = currTile.src;
+  currTile.src = otherTile.src;
+  otherTile.src = tempSrc;
+
+  turns += 1;
+  document.getElementById("turns").innerText = turns;
+}
+
+// Completado
 function checkCompletion() {
   const tiles = document.querySelectorAll("#board img");
   for (let i = 0; i < tiles.length; i++) {
@@ -140,7 +148,6 @@ function checkCompletion() {
       return;
     }
   }
-
   showFinalImage();
 }
 

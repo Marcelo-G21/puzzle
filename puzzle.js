@@ -6,29 +6,30 @@ var otherTile;
 
 var turns = 0;
 
+// Detectar si es pantalla táctil
 const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
 window.onload = function () {
-  
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < columns; c++) {
       let tile = document.createElement("img");
       tile.src = "./images/blank.jpg";
 
-      // Eventos según el tipo de dispositivo
-      addInteractionEvents(tile);
+      // Funcionalidad de arrastrar
+      addTileEventListeners(tile);
 
       document.getElementById("board").append(tile);
     }
   }
 
+  // Piezas
   let pieces = [];
   for (let i = 1; i <= rows * columns; i++) {
     pieces.push(i.toString());
   }
-
   pieces.reverse();
 
+  // Mezclar piezas
   for (let i = 0; i < pieces.length; i++) {
     let j = Math.floor(Math.random() * pieces.length);
     let tmp = pieces[i];
@@ -40,17 +41,18 @@ window.onload = function () {
     let tile = document.createElement("img");
     tile.src = "./images/" + pieces[i] + ".jpg";
 
-    addInteractionEvents(tile);
+    // Funcionalidad de arrastrar
+    addTileEventListeners(tile);
 
     document.getElementById("pieces").append(tile);
   }
 };
 
-function addInteractionEvents(tile) {
+function addTileEventListeners(tile) {
   if (isTouchDevice) {
-    tile.addEventListener("touchstart", touchStart, { passive: false });
-    tile.addEventListener("touchmove", touchMove, { passive: false });
-    tile.addEventListener("touchend", touchEnd, { passive: false });
+    tile.addEventListener("touchstart", handleTouchStart, { passive: true });
+    tile.addEventListener("touchmove", handleTouchMove, { passive: true });
+    tile.addEventListener("touchend", handleTouchEnd);
   } else {
     tile.addEventListener("dragstart", dragStart);
     tile.addEventListener("dragover", dragOver);
@@ -61,8 +63,7 @@ function addInteractionEvents(tile) {
   }
 }
 
-// ---------------- DRAG ----------------
-
+// Funciones drag para PC
 function dragStart() {
   currTile = this;
 }
@@ -78,6 +79,8 @@ function dragDrop() {
 }
 function dragEnd() {
   if (currTile.src.includes("blank") || !otherTile) {
+    currTile = null;
+    otherTile = null;
     return;
   }
 
@@ -90,47 +93,45 @@ function dragEnd() {
   document.getElementById("turns").innerText = turns;
 
   checkCompletion();
-}
-
-// ---------------- TOUCH ----------------
-
-function touchStart(e) {
-  e.preventDefault();
-  const touch = e.touches[0];
-  currTile = document.elementFromPoint(touch.clientX, touch.clientY);
-}
-
-function touchMove(e) {
-  e.preventDefault();
-  const touch = e.touches[0];
-  otherTile = document.elementFromPoint(touch.clientX, touch.clientY);
-}
-
-function touchEnd(e) {
-  if (!otherTile || currTile === otherTile) {
-    currTile = null;
-    otherTile = null;
-    return;
-  }
-
-  // Swap images
-  if (!currTile.src.includes("blank")) {
-    let currImg = currTile.src;
-    let otherImg = otherTile.src;
-    currTile.src = otherImg;
-    otherTile.src = currImg;
-
-    turns += 1;
-    document.getElementById("turns").innerText = turns;
-
-    checkCompletion();
-  }
 
   currTile = null;
   otherTile = null;
 }
 
-// ---------------- CHECK WIN ----------------
+// Funciones touch
+function handleTouchStart(e) {
+  currTile = e.target;
+}
+
+function handleTouchMove(e) {
+  const touch = e.touches[0];
+  const target = document.elementFromPoint(touch.clientX, touch.clientY);
+
+  if (target && target.tagName === "IMG" && target.parentElement.id === "board") {
+    otherTile = target;
+  }
+}
+
+function handleTouchEnd(e) {
+  if (!currTile || !otherTile || currTile === otherTile || currTile.src.includes("blank")) {
+    currTile = null;
+    otherTile = null;
+    return;
+  }
+
+  let currImg = currTile.src;
+  let otherImg = otherTile.src;
+  currTile.src = otherImg;
+  otherTile.src = currImg;
+
+  turns += 1;
+  document.getElementById("turns").innerText = turns;
+
+  checkCompletion();
+
+  currTile = null;
+  otherTile = null;
+}
 
 function checkCompletion() {
   const tiles = document.querySelectorAll("#board img");

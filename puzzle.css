@@ -1,18 +1,19 @@
-* {
-  box-sizing: border-box;
+
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  text-align: center;
+  background-color: #fdedec;
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 html, body {
   overflow: hidden;
   touch-action: manipulation;
-  margin: 0;
-  padding: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background-color: #fdedec;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .container {
@@ -26,17 +27,14 @@ html, body {
   height: 405px;
   border: 2px solid purple;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(5, 81px);
-  grid-template-rows: repeat(5, 81px);
-  gap: 0;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 #board img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  width: 79px;
+  height: 79px;
+  border: 0.5px solid lightblue;
 }
 
 #pieces {
@@ -46,16 +44,12 @@ html, body {
   margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 1px;
 }
 
 #pieces img {
-  width: 81px;
-  height: 81px;
-  object-fit: cover;
-  display: block;
+  width: 79px;
+  height: 79px;
+  border: 0.5px solid lightblue;
 }
 
 .blur {
@@ -109,50 +103,46 @@ html, body {
   color: white;
 }
 
-/* 🔧 Tablets y móviles medianos */
+
+/* Para pantallas de hasta 768px (tablets y móviles grandes) */
 @media (max-width: 768px) {
   #board {
     width: 300px;
     height: 300px;
-    grid-template-columns: repeat(5, 60px);
-    grid-template-rows: repeat(5, 60px);
+  }
+
+  #board img,
+  #pieces img {
+    width: 59px;
+    height: 59px;
   }
 
   #pieces {
     width: 300px;
     height: auto;
+    justify-content: center;
     overflow-y: auto;
-  }
-
-  #pieces img {
-    width: 60px;
-    height: 60px;
-  }
-
-  #board img,
-  #pieces img {
-    object-fit: cover;
   }
 }
 
-/* 📱 Móviles pequeños */
+/* Para pantallas de hasta 480px (móviles) */
 @media (max-width: 480px) {
   #board {
     width: 240px;
     height: 240px;
-    grid-template-columns: repeat(5, 47px);
-    grid-template-rows: repeat(5, 47px);
+  }
+
+  #board img,
+  #pieces img {
+    width: 46px;
+    height: 46px;
   }
 
   #pieces {
-    width: 245px;
+    width: 240px;
     height: auto;
+    justify-content: center;
     overflow-y: auto;
-  }
-
-  #pieces img {
-    width: 47px;
-    height: 47px;
   }
 
   #win-screen .moves-text {
